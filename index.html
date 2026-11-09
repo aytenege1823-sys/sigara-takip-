@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0f1115">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Sigara Takip">
+<title>Sigara Takip</title>
+<style>
+:root{
+  --bg:#0f1115;--card:#171a21;--card2:#1e222b;--line:#2a2f3a;
+  --text:#eceff4;--muted:#8b93a3;--accent:#ff7a45;--accent2:#ffb347;--ok:#4cc38a;--bad:#ff5c5c;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,system-ui,sans-serif}
+body{padding:env(safe-area-inset-top) 0 0 0;min-height:100vh}
+#app{max-width:520px;margin:0 auto;padding:16px 16px calc(92px + env(safe-area-inset-bottom))}
+h1{font-size:20px;margin:6px 0 14px;font-weight:700}
+h2{font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:22px 0 10px;font-weight:600}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:12px}
+.big{font-size:38px;font-weight:700;letter-spacing:-.02em;line-height:1.1}
+.sub{color:var(--muted);font-size:13px;margin-top:4px}
+.row{display:flex;gap:10px}
+.row>*{flex:1}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px}
+.stat b{display:block;font-size:20px;margin-top:2px}
+.stat span{color:var(--muted);font-size:12px}
+.smoke{width:100%;border:0;border-radius:20px;padding:22px;font-size:20px;font-weight:700;color:#1a1208;background:linear-gradient(135deg,var(--accent),var(--accent2));box-shadow:0 8px 24px rgba(255,122,69,.25)}
+.smoke:active{transform:scale(.985)}
+.btn{border:1px solid var(--line);background:var(--card2);color:var(--text);border-radius:12px;padding:12px 14px;font-size:14px;font-weight:600}
+.btn.danger{color:var(--bad)}
+.btn.confirm{background:var(--bad);color:#fff;border-color:var(--bad)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
+.chip{border:1px solid var(--line);background:var(--card2);color:var(--muted);border-radius:999px;padding:8px 12px;font-size:13px}
+.chip.on{background:rgba(255,122,69,.15);color:var(--accent2);border-color:var(--accent)}
+.bar{height:8px;background:var(--card2);border-radius:99px;overflow:hidden;margin-top:10px}
+.bar i{display:block;height:100%;background:var(--ok);border-radius:99px;transition:width .3s}
+.bar i.over{background:var(--bad)}
+.list .it{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--line);font-size:15px}
+.list .it:last-child{border-bottom:0}
+.list .tag{color:var(--muted);font-size:12px;margin-left:8px}
+.x{background:none;border:0;color:var(--muted);font-size:18px;padding:4px 8px}
+.chart{display:flex;align-items:flex-end;gap:5px;height:120px;position:relative}
+.chart .col{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;height:100%}
+.chart .col i{display:block;width:100%;background:var(--accent);border-radius:4px 4px 0 0;min-height:2px}
+.chart .col i.zero{background:var(--line)}
+.chart .col em{font-style:normal;font-size:11px;color:var(--muted);margin-bottom:3px}
+.axis{display:flex;gap:5px;margin-top:6px}
+.axis span{flex:1;text-align:center;font-size:11px;color:var(--muted)}
+.hours{display:flex;align-items:flex-end;gap:2px;height:110px}
+.hours i{flex:1;background:var(--accent);border-radius:3px 3px 0 0;min-height:2px}
+.hours i.zero{background:var(--line)}
+.haxis{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:6px}
+.ms{display:flex;gap:10px;align-items:flex-start;padding:9px 0;border-bottom:1px solid var(--line);font-size:14px}
+.ms:last-child{border-bottom:0}
+.ms .dot{width:18px;height:18px;border-radius:50%;border:2px solid var(--line);flex:none;margin-top:1px}
+.ms.done .dot{background:var(--ok);border-color:var(--ok)}
+.ms small{display:block;color:var(--muted);font-size:12px}
+label{display:block;font-size:13px;color:var(--muted);margin:12px 0 6px}
+input,textarea{width:100%;background:var(--card2);color:var(--text);border:1px solid var(--line);border-radius:12px;padding:12px;font-size:16px;font-family:inherit}
+textarea{min-height:90px;font-size:12px;font-family:ui-monospace,Menlo,monospace}
+nav{position:fixed;left:0;right:0;bottom:0;background:rgba(15,17,21,.95);backdrop-filter:blur(10px);border-top:1px solid var(--line);padding:8px 8px calc(8px + env(safe-area-inset-bottom));display:flex;gap:6px;max-width:520px;margin:0 auto}
+nav button{flex:1;background:none;border:0;color:var(--muted);padding:10px 4px;border-radius:12px;font-size:13px;font-weight:600}
+nav button.on{color:var(--accent2);background:var(--card)}
+.note{color:var(--muted);font-size:12px;line-height:1.5}
+.warn{background:rgba(255,92,92,.12);border:1px solid var(--bad);color:#ffb0b0;border-radius:12px;padding:10px 12px;font-size:13px;margin-bottom:12px}
+.hide{display:none}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<nav id="nav"></nav>
+
+<script>
+(function(){
+'use strict';
+var KEY='sigaraTakipV1';
+var TAGS=['Kahve','Stres','Yemek sonrası','Sosyal','Can sıkıntısı','Alışkanlık'];
+var DEF={logs:[],settings:{price:100,perPack:20,goal:10}};
+var mem=null, storageOk=true;
+
+function load(){
+  try{
+    var s=localStorage.getItem(KEY);
+    if(s){var o=JSON.parse(s);return norm(o);}
+  }catch(e){storageOk=false;}
+  return mem?norm(mem):JSON.parse(JSON.stringify(DEF));
+}
+function norm(o){
+  var d=JSON.parse(JSON.stringify(DEF));
+  if(o&&Array.isArray(o.logs)){
+    d.logs=o.logs.filter(function(l){return l&&typeof l.t==='number'&&isFinite(l.t);}).map(function(l){return {t:l.t,tag:typeof l.tag==='string'?l.tag:''};});
+  }
+  if(o&&o.settings){
+    var p=+o.settings.price,n=+o.settings.perPack,g=+o.settings.goal;
+    if(p>=0)d.settings.price=p; if(n>0)d.settings.perPack=n; if(g>=0)d.settings.goal=g;
+  }
+  d.logs.sort(function(a,b){return a.t-b.t;});
+  return d;
+}
+var state=load();
+function save(){
+  mem=state;
+  try{localStorage.setItem(KEY,JSON.stringify(state));}catch(e){storageOk=false;}
+}
+
+var tab='today', selTag='', showPast=false, confirmKey='', backupText='', importText='', msg='';
+
+function $(id){return document.getElementById(id);}
+function startOfDay(ts){var d=new Date(ts);d.setHours(0,0,0,0);return d.getTime();}
+var DAY=86400000;
+function unitCost(){return state.settings.price/state.settings.perPack;}
+function tl(n){return n.toLocaleString('tr-TR',{maximumFractionDigits:0})+' ₺';}
+function tl2(n){return n.toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2})+' ₺';}
+function pad(n){return (n<10?'0':'')+n;}
+function hm(ts){var d=new Date(ts);return pad(d.getHours())+':'+pad(d.getMinutes());}
+function fmtDur(ms){
+  if(ms<0)ms=0;
+  var m=Math.floor(ms/60000);
+  if(m<60)return m+' dk';
+  var h=Math.floor(m/60);m=m%60;
+  if(h<24)return h+' sa '+m+' dk';
+  var d=Math.floor(h/24);h=h%24;
+  return d+' gün '+h+' sa';
+}
+function esc(s){return String(s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function toLocalInput(ts){
+  var d=new Date(ts);
+  return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())+'T'+pad(d.getHours())+':'+pad(d.getMinutes());
+}
+
+/* ---------- hesaplar ---------- */
+function logsBetween(a,b){return state.logs.filter(function(l){return l.t>=a&&l.t<b;});}
+function todayLogs(){var s=startOfDay(Date.now());return logsBetween(s,s+DAY);}
+function avgGap(logs){
+  // aynı gün içindeki ardışık sigaralar arası ortalama süre (ms)
+  var sum=0,n=0;
+  for(var i=1;i<logs.length;i++){
+    if(startOfDay(logs[i].t)===startOfDay(logs[i-1].t)){sum+=logs[i].t-logs[i-1].t;n++;}
+  }
+  return n?sum/n:null;
+}
+function dailyAvg(days){
+  if(!state.logs.length)return 0;
+  var now=Date.now(), first=startOfDay(state.logs[0].t);
+  var span=Math.min(days,Math.floor((startOfDay(now)-first)/DAY)+1);
+  var from=startOfDay(now)-(days-1)*DAY;
+  var c=logsBetween(from,now+1).length;
+  return c/Math.max(1,span);
+}
+
+/* ---------- görünüm ---------- */
+function render(){
+  var h='';
+  if(!storageOk)h+='<div class="warn">Bu tarayıcı veriyi kalıcı kaydedemiyor. Sayfayı kapatırsan kayıtlar gidebilir. Ayarlar sekmesinden düzenli yedek al.</div>';
+  if(tab==='today')h+=viewToday();
+  else if(tab==='stats')h+=viewStats();
+  else h+=viewSettings();
+  $('app').innerHTML=h;
+  var nav='';
+  [['today','Bugün'],['stats','İstatistik'],['settings','Ayarlar']].forEach(function(t){
+    nav+='<button data-tab="'+t[0]+'" class="'+(tab===t[0]?'on':'')+'">'+t[1]+'</button>';
+  });
+  $('nav').innerHTML=nav;
+  tick();
+}
+
+function viewToday(){
+  var logs=todayLogs(), n=logs.length, s=state.settings;
+  var cost=n*unitCost();
+  var pct=s.goal>0?Math.min(100,n/s.goal*100):0;
+  var over=s.goal>0&&n>s.goal;
+  var h='<h1>Sigara Takip</h1>';
+  h+='<div class="card"><div class="sub">Son sigaradan beri</div><div class="big" id="since">—</div><div class="sub" id="sinceNext"></div></div>';
+  h+='<div class="row" style="margin-bottom:12px"><div class="stat"><span>Bugün</span><b>'+n+(s.goal>0?' / '+s.goal:'')+'</b></div><div class="stat"><span>Bugünkü maliyet</span><b>'+tl(cost)+'</b></div></div>';
+  if(s.goal>0)h+='<div class="bar" style="margin:-2px 0 14px"><i class="'+(over?'over':'')+'" style="width:'+pct+'%"></i></div>';
+  h+='<div class="chips">';
+  TAGS.forEach(function(t){h+='<button class="chip'+(selTag===t?' on':'')+'" data-tag="'+esc(t)+'">'+esc(t)+'</button>';});
+  h+='</div>';
+  h+='<button class="smoke" id="logNow">Sigara içtim</button>';
+  h+='<div class="note" style="margin-top:8px">İstersen önce nedenini seç, sonra butona bas. Seçim zorunlu değil.</div>';
+  h+='<div style="margin-top:12px"><button class="btn" id="togglePast" style="width:100%">'+(showPast?'Kapat':'Geçmiş saate kayıt ekle')+'</button></div>';
+  if(showPast){
+    h+='<div class="card" style="margin-top:10px"><label style="margin-top:0">Ne zaman içtin?</label><input type="datetime-local" id="pastTime" value="'+toLocalInput(Date.now())+'"><div style="margin-top:10px"><button class="btn" id="addPast" style="width:100%">Kaydı ekle</button></div></div>';
+  }
+  if(msg){h+='<div class="note" style="margin-top:10px;color:var(--accent2)">'+esc(msg)+'</div>';}
+  h+='<h2>Bugünün kayıtları</h2><div class="card list">';
+  if(!n)h+='<div class="sub">Bugün henüz kayıt yok.</div>';
+  else{
+    for(var i=n-1;i>=0;i--){
+      var gap=i>0?' · '+fmtDur(logs[i].t-logs[i-1].t)+' sonra':'';
+      h+='<div class="it"><div>'+hm(logs[i].t)+(logs[i].tag?'<span class="tag">'+esc(logs[i].tag)+'</span>':'')+'<span class="tag">'+gap+'</span></div><button class="x" data-del="'+logs[i].t+'" aria-label="Sil">✕</button></div>';
+    }
+  }
+  h+='</div>';
+  return h;
+}
+
+var MS=[
+ [20*60000,'20 dakika','Nabız ve tansiyon düşmeye başlar'],
+ [12*3600000,'12 saat','Kandaki karbonmonoksit seviyesi normale döner'],
+ [14*DAY,'2 hafta','Dolaşım ve akciğer fonksiyonu iyileşmeye başlar'],
+ [30*DAY,'1 ay','Öksürük ve nefes darlığı azalmaya başlar'],
+ [365*DAY,'1 yıl','Koroner kalp hastalığı riski yarıya iner']
+];
+
+function viewStats(){
+  var now=Date.now(), s=state.settings, uc=unitCost();
+  var sod=startOfDay(now);
+  var h='<h1>İstatistik</h1>';
+  if(!state.logs.length)return h+'<div class="card"><div class="sub">Henüz kayıt yok. "Bugün" sekmesinden ilk kaydını ekle.</div></div>';
+
+  // son 7 gün
+  var cols=[],max=Math.max(1,s.goal);
+  var days=['Paz','Pzt','Sal','Çar','Per','Cum','Cmt'];
+  for(var i=6;i>=0;i--){
+    var a=sod-i*DAY, c=logsBetween(a,a+DAY).length;
+    cols.push({c:c,l:i===0?'Bugün':days[new Date(a).getDay()]});
+    if(c>max)max=c;
+  }
+  h+='<h2>Son 7 gün</h2><div class="card"><div class="chart">';
+  cols.forEach(function(x){
+    h+='<div class="col"><em>'+x.c+'</em><i class="'+(x.c?'':'zero')+'" style="height:'+(x.c/max*88)+'%"></i></div>';
+  });
+  h+='</div><div class="axis">';
+  cols.forEach(function(x){h+='<span>'+x.l+'</span>';});
+  h+='</div>'+(s.goal>0?'<div class="note" style="margin-top:8px">Günlük hedefin: '+s.goal+' adet</div>':'')+'</div>';
+
+  // özet
+  var w=logsBetween(sod-6*DAY,now+1).length, m=logsBetween(sod-29*DAY,now+1).length;
+  var avg7=dailyAvg(7), avg30=dailyAvg(30);
+  var tg=todayLogs(), gToday=avgGap(tg);
+  var last7=logsBetween(sod-6*DAY,now+1), g7=avgGap(last7);
+  h+='<h2>Maliyet</h2><div class="row"><div class="stat"><span>Son 7 gün</span><b>'+tl(w*uc)+'</b></div><div class="stat"><span>Son 30 gün</span><b>'+tl(m*uc)+'</b></div></div>';
+  h+='<div class="row" style="margin-top:10px"><div class="stat"><span>Günlük ortalama (7g)</span><b>'+avg7.toFixed(1).replace('.',',')+' adet</b></div><div class="stat"><span>Yıllık tahmin</span><b>'+tl(avg7*uc*365)+'</b></div></div>';
+  h+='<div class="note" style="margin-top:8px">Tahmin, son 7 günlük ortalamanın bir yıl boyunca sürmesine göre hesaplanır. Tek sigara: '+tl2(uc)+'.</div>';
+
+  h+='<h2>Aralıklar</h2><div class="row"><div class="stat"><span>Bugün sigaralar arası</span><b>'+(gToday?fmtDur(gToday):'—')+'</b></div><div class="stat"><span>Son 7 gün ortalama</span><b>'+(g7?fmtDur(g7):'—')+'</b></div></div>';
+
+  // saat dağılımı
+  var hc=[];for(var k=0;k<24;k++)hc.push(0);
+  logsBetween(sod-29*DAY,now+1).forEach(function(l){hc[new Date(l.t).getHours()]++;});
+  var hmax=Math.max.apply(null,hc)||1, peak=hc.indexOf(Math.max.apply(null,hc));
+  h+='<h2>Günün hangi saatlerinde? (son 30 gün)</h2><div class="card"><div class="hours">';
+  hc.forEach(function(c){h+='<i class="'+(c?'':'zero')+'" style="height:'+(c/hmax*100)+'%" title="'+c+'"></i>';});
+  h+='</div><div class="haxis"><span>00</span><span>06</span><span>12</span><span>18</span><span>24</span></div>';
+  if(Math.max.apply(null,hc)>0)h+='<div class="note" style="margin-top:10px">En yoğun saat: <b style="color:var(--text)">'+pad(peak)+':00–'+pad((peak+1)%24)+':00</b> ('+hc[peak]+' sigara)</div>';
+  h+='</div>';
+
+  // nedenler
+  var tc={};
+  logsBetween(sod-29*DAY,now+1).forEach(function(l){if(l.tag)tc[l.tag]=(tc[l.tag]||0)+1;});
+  var keys=Object.keys(tc).sort(function(a,b){return tc[b]-tc[a];});
+  if(keys.length){
+    h+='<h2>Nedenler (son 30 gün)</h2><div class="card list">';
+    keys.forEach(function(k2){h+='<div class="it"><span>'+esc(k2)+'</span><b>'+tc[k2]+'</b></div>';});
+    h+='</div>';
+  }
+
+  // vücut
+  var el=now-state.logs[state.logs.length-1].t;
+  h+='<h2>Son sigaradan beri vücut</h2><div class="card">';
+  MS.forEach(function(x){
+    var done=el>=x[0];
+    h+='<div class="ms'+(done?' done':'')+'"><span class="dot"></span><div><b>'+x[1]+'</b><small>'+x[2]+'</small></div></div>';
+  });
+  h+='<div class="note" style="margin-top:10px">Genel sağlık bilgisidir (Amerikan Kanser Derneği gibi kaynaklarda yer alan tipik süreler). Kişiye göre değişir, kişisel tıbbi tahmin değildir.</div></div>';
+  h+='<div class="note">Toplam kayıt: '+state.logs.length+' · Toplam harcama: '+tl(state.logs.length*uc)+'</div>';
+  return h;
+}
+
+function viewSettings(){
+  var s=state.settings;
+  var h='<h1>Ayarlar</h1><div class="card">';
+  h+='<label style="margin-top:0">Paket fiyatı (₺)</label><input id="sPrice" type="number" inputmode="decimal" min="0" step="0.5" value="'+s.price+'">';
+  h+='<label>Paketteki sigara sayısı</label><input id="sPer" type="number" inputmode="numeric" min="1" step="1" value="'+s.perPack+'">';
+  h+='<label>Günlük hedef (0 = hedef yok)</label><input id="sGoal" type="number" inputmode="numeric" min="0" step="1" value="'+s.goal+'">';
+  h+='<div class="note" style="margin-top:10px">Tek sigara maliyeti: <b style="color:var(--text)">'+tl2(unitCost())+'</b></div>';
+  h+='<div style="margin-top:12px"><button class="btn" id="saveSet" style="width:100%">Kaydet</button></div></div>';
+
+  h+='<h2>Yedekleme</h2><div class="card">';
+  h+='<div class="note" style="margin-bottom:10px">Verilerin sadece bu cihazın tarayıcısında durur. Telefonu değiştirirsen ya da tarayıcı verisini silersen kaybolur. Zaman zaman yedeği kopyalayıp bir yere (not uygulaması, kendine mesaj) yapıştır.</div>';
+  h+='<div class="row"><button class="btn" id="showBackup">Yedeği göster</button><button class="btn" id="copyBackup">Kopyala</button></div>';
+  if(backupText)h+='<textarea id="backupArea" readonly style="margin-top:10px">'+esc(backupText)+'</textarea>';
+  h+='<label>Yedekten geri yükle (yedek metnini yapıştır)</label><textarea id="importArea" placeholder="{&quot;logs&quot;:[...]}">'+esc(importText)+'</textarea>';
+  h+='<div style="margin-top:10px"><button class="btn'+(confirmKey==='import'?' confirm':'')+'" id="doImport" style="width:100%">'+(confirmKey==='import'?'Emin misin? Mevcut veri değişecek, tekrar dokun':'Geri yükle')+'</button></div>';
+  if(msg)h+='<div class="note" style="margin-top:10px;color:var(--accent2)">'+esc(msg)+'</div>';
+  h+='</div>';
+
+  h+='<h2>Tehlikeli bölge</h2><div class="card"><button class="btn danger'+(confirmKey==='wipe'?' confirm':'')+'" id="wipe" style="width:100%">'+(confirmKey==='wipe'?'Tüm kayıtlar silinecek, tekrar dokun':'Tüm verileri sil')+'</button></div>';
+  return h;
+}
+
+/* ---------- canlı sayaç ---------- */
+function tick(){
+  var el=$('since'); if(!el)return;
+  if(!state.logs.length){el.textContent='Kayıt yok';$('sinceNext').textContent='';return;}
+  var d=Date.now()-state.logs[state.logs.length-1].t;
+  el.textContent=fmtDur(d);
+  var next=null;
+  for(var i=0;i<MS.length;i++){if(d<MS[i][0]){next=MS[i];break;}}
+  $('sinceNext').textContent=next?'Sıradaki: '+next[1]+' ('+fmtDur(next[0]-d)+' kaldı)':'Tüm eşikleri geçtin.';
+}
+setInterval(tick,20000);
+
+/* ---------- olaylar ---------- */
+function addLog(t){
+  state.logs.push({t:t,tag:selTag});
+  state.logs.sort(function(a,b){return a.t-b.t;});
+  save();
+}
+document.addEventListener('click',function(e){
+  var b=e.target.closest('button'); if(!b)return;
+  var id=b.id, ds=b.dataset;
+  if(ds.tab){tab=ds.tab;confirmKey='';msg='';showPast=false;render();window.scrollTo(0,0);return;}
+  if(ds.tag!==undefined){selTag=(selTag===ds.tag)?'':ds.tag;render();return;}
+  if(ds.del){
+    var t=+ds.del; state.logs=state.logs.filter(function(l){return l.t!==t;}); save(); msg=''; render(); return;
+  }
+  if(id==='logNow'){addLog(Date.now());selTag='';msg='';render();return;}
+  if(id==='togglePast'){showPast=!showPast;msg='';render();return;}
+  if(id==='addPast'){
+    var v=$('pastTime').value, t2=v?new Date(v).getTime():NaN;
+    if(!isFinite(t2)){msg='Geçerli bir tarih ve saat seç.';render();return;}
+    if(t2>Date.now()+60000){msg='Gelecekteki bir zamana kayıt eklenemez.';render();return;}
+    addLog(t2);selTag='';showPast=false;msg='Kayıt eklendi ('+hm(t2)+').';render();return;
+  }
+  if(id==='saveSet'){
+    var p=parseFloat($('sPrice').value), n=parseInt($('sPer').value,10), g=parseInt($('sGoal').value,10);
+    if(!(p>=0)||!(n>0)||!(g>=0)){msg='Değerleri kontrol et: fiyat ≥ 0, paket adedi ≥ 1, hedef ≥ 0.';render();return;}
+    state.settings={price:p,perPack:n,goal:g};save();msg='Ayarlar kaydedildi.';render();return;
+  }
+  if(id==='showBackup'){backupText=JSON.stringify(state);msg='';render();return;}
+  if(id==='copyBackup'){
+    var txt=JSON.stringify(state);backupText=txt;
+    var done=function(ok){msg=ok?'Yedek panoya kopyalandı.':'Otomatik kopyalama olmadı; aşağıdaki metni elle seçip kopyala.';render();};
+    try{navigator.clipboard.writeText(txt).then(function(){done(true);},function(){done(false);});}catch(err){done(false);}
+    return;
+  }
+  if(id==='doImport'){
+    var ta=$('importArea'); importText=ta?ta.value:'';
+    if(confirmKey!=='import'){
+      try{var o=JSON.parse(importText);if(!o||!Array.isArray(o.logs))throw 0;}catch(x){msg='Geçerli bir yedek metni değil.';render();return;}
+      confirmKey='import';msg='';render();return;
+    }
+    try{state=norm(JSON.parse(importText));save();importText='';confirmKey='';msg='Yedek yüklendi: '+state.logs.length+' kayıt.';}
+    catch(x2){msg='Yedek okunamadı.';confirmKey='';}
+    render();return;
+  }
+  if(id==='wipe'){
+    if(confirmKey!=='wipe'){confirmKey='wipe';render();return;}
+    state=JSON.parse(JSON.stringify(DEF));save();confirmKey='';msg='Tüm veriler silindi.';render();return;
+  }
+});
+render();
+})();
+</script>
+</body>
+</html>
